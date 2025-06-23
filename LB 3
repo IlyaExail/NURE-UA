@@ -1,0 +1,132 @@
+{
+  "nbformat": 4,
+  "nbformat_minor": 0,
+  "metadata": {
+    "colab": {
+      "provenance": [],
+      "authorship_tag": "ABX9TyPFqfrQNW7MqZP8cxRrhXbO",
+      "include_colab_link": true
+    },
+    "kernelspec": {
+      "name": "python3",
+      "display_name": "Python 3"
+    },
+    "language_info": {
+      "name": "python"
+    }
+  },
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "view-in-github",
+        "colab_type": "text"
+      },
+      "source": [
+        "<a href=\"https://colab.research.google.com/github/IlyaExail/NURE-UA/blob/main/LB%203\" target=\"_parent\"><img src=\"https://colab.research.google.com/assets/colab-badge.svg\" alt=\"Open In Colab\"/></a>"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "id": "PXUcG_NrEyPH"
+      },
+      "outputs": [],
+      "source": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "\n",
+        "import sqlite3\n",
+        "import hashlib\n",
+        "from getpass import getpass\n",
+        "\n",
+        "\n",
+        "conn = sqlite3.connect(\"users.db\")\n",
+        "cursor = conn.cursor()\n",
+        "\n",
+        "\n",
+        "cursor.execute('''\n",
+        "CREATE TABLE IF NOT EXISTS users (\n",
+        "    login TEXT PRIMARY KEY,\n",
+        "    password TEXT NOT NULL,\n",
+        "    full_name TEXT NOT NULL\n",
+        ")\n",
+        "''')\n",
+        "conn.commit()\n",
+        "\n",
+        "\n",
+        "def hash_password(password):\n",
+        "    return hashlib.sha256(password.encode()).hexdigest()\n",
+        "\n",
+        "\n",
+        "def add_user(login, password, full_name):\n",
+        "    try:\n",
+        "        hashed = hash_password(password)\n",
+        "        cursor.execute(\"INSERT INTO users (login, password, full_name) VALUES (?, ?, ?)\",\n",
+        "                       (login, hashed, full_name))\n",
+        "        conn.commit()\n",
+        "        print(f\" Користувач '{full_name}' доданий.\")\n",
+        "    except sqlite3.IntegrityError:\n",
+        "        print(f\" Користувач з логіном '{login}' вже існує.\")\n",
+        "\n",
+        "\n",
+        "def update_password(login, new_password):\n",
+        "    hashed = hash_password(new_password)\n",
+        "    cursor.execute(\"UPDATE users SET password = ? WHERE login = ?\", (hashed, login))\n",
+        "    if cursor.rowcount == 0:\n",
+        "        print(\" Користувача не знайдено.\")\n",
+        "    else:\n",
+        "        conn.commit()\n",
+        "        print(\" Пароль оновлено.\")\n",
+        "\n",
+        "\n",
+        "def authenticate(login):\n",
+        "    cursor.execute(\"SELECT password FROM users WHERE login = ?\", (login,))\n",
+        "    row = cursor.fetchone()\n",
+        "    if row:\n",
+        "        entered_password = input(\"Введіть пароль: \")\n",
+        "        if hash_password(entered_password) == row[0]:\n",
+        "            print(\" Автентифікація пройдена.\")\n",
+        "        else:\n",
+        "            print(\" Невірний пароль.\")\n",
+        "    else:\n",
+        "        print(\" Користувача не знайдено.\")\n",
+        "\n",
+        "\n",
+        "add_user(\"korobchuk_ilya\", \"ilya12345\", \"Коробчук Ілля Олегович\")\n",
+        "\n",
+        "\n",
+        "\n"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "CgEgCo-4E0Ps",
+        "outputId": "a25c73a0-f9d2-400f-a42c-56fbb1dcbe20"
+      },
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            " Користувач 'Коробчук Ілля Олегович' доданий.\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [],
+      "metadata": {
+        "id": "DlOPwUfDFbLc"
+      },
+      "execution_count": null,
+      "outputs": []
+    }
+  ]
+}
